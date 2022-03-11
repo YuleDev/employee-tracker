@@ -1,13 +1,110 @@
-/* need inquirer 
+const inquirer = require('inquirer');
+const managers = require('./utils/managers');
+const roles = require('./utils/roles');
+const employees = require('./utils/employee');
+const departments = require('./utils/departments');
+const cTable = require('console.table');
 
-questions will be as follows: 
--view all departments
--view all roles
--view all employees
--add department
--add role
--add an employee
--update employee info
+function mainMenuInterface () {
+    inquirer.prompt([
+        {
+            type: 'list',
+            message: 'What would you like to do?',
+            name: 'choice',
+            choices: ['View all departments', 'View all roles', 'View all employees', 'Add a department', 'Add a role', 'Add an employee', 'Update employee information', 'Exit application']
+        }/* use listOfOptions.push(new inquirer.Separator( "-- End of List --" ));  to show user where the list ends */
+    ]).then(response => {
+        if(response.choice == 'View all departments') {
+            viewDepartments()
+        }
+        if(response.choice == 'View all roles') {
+            viewRoles()
+        }
+        if(response.choice == 'View all employees') {
+            viewEmployees()
+        }
+        if (response.choice == 'Add a department') {
+            inquirer.prompt([
+                {
+                    type: 'input',
+                    name: 'departmentTitle',
+                    message: 'What is the new departments name?'
+                },
+                {
+                    type: 'input',
+                    name: 'departmentDescription',
+                    message: 'What is a brief description of the new department?'
+                }
+            ]).then((newDeptInfo) => {
+                departmentTitle.insertDepartmentTitle(newDeptInfo.departmentTitle);
+                departmentDescription.insertDepartmentDescription(newDeptInfo.departmentDescription);
+                mainMenuInterface();
+            })
+
+           // addDepartment()
+        }
+        if(response.choice == 'Add a role') {
+            inquirer.prompt([
+                {
+                    type: 'input',
+                    name: 'newRole',
+                    message: 'What is the new roles name?'
+                }
+            ]).then((newRoleInfo) => {
+                newRoleInfo.insertNewRole(newRoleInfo);
+                mainMenuInterface()
+            })
+        }
+        if(response.choice == 'Add an employee') {
+            inquirer.prompt([
+                {
+                    type: 'input',
+                    name: 'firstName',
+                    message: 'What is the new roles name?'
+                },
+                {
+                    type: 'input',
+                    name: 'lastName',
+                    message: 'What is the new roles name?'
+                },
+                {
+                    type: 'input',
+                    name: 'salary',
+                    message: 'What is the new roles name?'
+                },
+                {
+                    type: 'input',
+                    name: 'employeerole',
+                    message: 'What is the employees roles?'
+                }
+            ]).then((addedEmployee) => {
+                addedEmployee.insertNewEmployee(/* use template literals for multiple info into one func rather than have multiple funcs? */)
+                mainMenuInterface()
+            })
+        }
+        if(response.choice == 'Update employee information') {
+            employeeUpdateInfo()
+        }
+        if (response.choice == 'Exit application') {
+            return console.log('Thank you for working with us!')
+        }
+    })
+};
+
+function viewDepartments() {
+    
+}
+mainMenuInterface();
+
+
+/* ).then(function ({ first_name, last_name, manager }) {
+            connection.query("INSERT INTO employee (first_name, last_name, manager) 
+                 VALUES ?", ('first_name', 'last_name', 'manager'), function (err, result) {
+                if (err) throw err;
+}) */
+
+
+/*
 
 make user of oop like in team profile generator
 
