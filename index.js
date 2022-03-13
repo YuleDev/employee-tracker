@@ -43,28 +43,23 @@ function mainMenuInterface () {
                     name: 'departmentTitle',
                     message: 'What is the new departments name?'
                 }
-            ]).then((response) => {
+            ]).then(response => {
 
-                function createDepartment() {
+                const newDept = response.departmentTitle;
+
                     const sqlString = `
-                    INSERT INTO departments (dept_name)
-                    VALUES (${newDept})`
+                    INSERT INTO departments (dept_name) VALUES ("${newDept}")`
                 
                     db.query(sqlString, (err, result) => {
                         if(err) throw err;
                         console.log('\n')
                         console.table(result)
                         console.log('\n')
-                    })
-                };
 
-                const newDept = response.departmentTitle;
-                createDepartment(newDept);
-                console.log('You added shit!');
-                mainMenuInterface();
+                        mainMenuInterface();
+                    });
+                
             })
-
-           // addDepartment()
         }
         if(response.choice == 'Add a role') {
             inquirer.prompt([
@@ -158,7 +153,6 @@ function viewRoles() {
         mainMenuInterface()
     })
 };
-
 
 /* ).then(function ({ first_name, last_name, manager }) {
             connection.query("INSERT INTO employee (first_name, last_name, manager) 
