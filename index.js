@@ -4,6 +4,19 @@ const roles = require('./utils/roles');
 const employees = require('./utils/employee');
 const departments = require('./utils/departments');
 const cTable = require('console.table');
+const mysql = require("mysql2");
+
+const db = mysql.createConnection({
+    host: 'localhost',
+    database: 'company',
+    password: 'password',
+    user: 'root'
+})
+
+db.connect((err) => {
+    if (err) throw err;
+    mainMenuInterface();
+})
 
 function mainMenuInterface () {
     inquirer.prompt([
@@ -29,15 +42,25 @@ function mainMenuInterface () {
                     type: 'input',
                     name: 'departmentTitle',
                     message: 'What is the new departments name?'
-                },
-                {
-                    type: 'input',
-                    name: 'departmentDescription',
-                    message: 'What is a brief description of the new department?'
                 }
-            ]).then((newDeptInfo) => {
-                departmentTitle.insertDepartmentTitle(newDeptInfo.departmentTitle);
-                departmentDescription.insertDepartmentDescription(newDeptInfo.departmentDescription);
+            ]).then((response) => {
+
+                function createDepartment() {
+                    const sqlString = `
+                    INSERT INTO departments (dept_name)
+                    VALUES (${newDept})`
+                
+                    db.query(sqlString, (err, result) => {
+                        if(err) throw err;
+                        console.log('\n')
+                        console.table(result)
+                        console.log('\n')
+                    })
+                };
+
+                const newDept = response.departmentTitle;
+                createDepartment(newDept);
+                console.log('You added shit!');
                 mainMenuInterface();
             })
 
@@ -92,9 +115,49 @@ function mainMenuInterface () {
 };
 
 function viewDepartments() {
-    
-}
-mainMenuInterface();
+    const sqlString = `
+    SELECT *
+    FROM departments`
+
+    db.query(sqlString, (err, result) => {
+        if(err) throw err;
+        console.log('\n')
+        console.table(result)
+        console.log('\n')
+
+        mainMenuInterface()
+    })
+};
+
+function viewEmployees() {
+    const sqlString = `
+    SELECT *
+    FROM employees`
+
+    db.query(sqlString, (err, result) => {
+        if(err) throw err;
+        console.log('\n')
+        console.table(result)
+        console.log('\n')
+
+        mainMenuInterface()
+    })
+};
+
+function viewRoles() {
+    const sqlString = `
+    SELECT *
+    FROM roles`
+
+    db.query(sqlString, (err, result) => {
+        if(err) throw err;
+        console.log('\n')
+        console.table(result)
+        console.log('\n')
+
+        mainMenuInterface()
+    })
+};
 
 
 /* ).then(function ({ first_name, last_name, manager }) {
