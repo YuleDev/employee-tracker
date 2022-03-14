@@ -1,8 +1,4 @@
 const inquirer = require('inquirer');
-const managers = require('./utils/managers');
-const roles = require('./utils/roles');
-const employees = require('./utils/employee');
-const departments = require('./utils/departments');
 const cTable = require('console.table');
 const mysql = require("mysql2");
 
@@ -18,7 +14,7 @@ db.connect((err) => {
     mainMenuInterface();
 })
 
-function mainMenuInterface () {
+function mainMenuInterface() {
     inquirer.prompt([
         {
             type: 'list',
@@ -27,13 +23,13 @@ function mainMenuInterface () {
             choices: ['View all departments', 'View all roles', 'View all employees', 'Add a department', 'Add a role', 'Add an employee', 'Update employee information', 'Exit application']
         }/* use listOfOptions.push(new inquirer.Separator( "-- End of List --" ));  to show user where the list ends */
     ]).then(response => {
-        if(response.choice == 'View all departments') {
+        if (response.choice == 'View all departments') {
             viewDepartments()
         }
-        if(response.choice == 'View all roles') {
+        if (response.choice == 'View all roles') {
             viewRoles()
         }
-        if(response.choice == 'View all employees') {
+        if (response.choice == 'View all employees') {
             viewEmployees()
         }
         if (response.choice == 'Add a department') {
@@ -47,60 +43,99 @@ function mainMenuInterface () {
 
                 const newDept = response.departmentTitle;
 
-                    const sqlString = `
+                const sqlString = `
                     INSERT INTO departments (dept_name) VALUES ("${newDept}")`
-                
-                    db.query(sqlString, (err, result) => {
-                        if(err) throw err;
-                        console.log('\n')
-                        console.table(result)
-                        console.log('\n')
 
-                        mainMenuInterface();
-                    });
-                
+                db.query(sqlString, (err, result) => {
+                    if (err) throw err;
+                    console.log('\n')
+                    console.table(result)
+                    console.log('\n')
+
+                    mainMenuInterface();
+                });
+
             })
         }
-        if(response.choice == 'Add a role') {
+        if (response.choice == 'Add a role') {
             inquirer.prompt([
                 {
                     type: 'input',
                     name: 'newRole',
                     message: 'What is the new roles name?'
+                },
+                {
+                    type: 'input',
+                    name: 'newSalary',
+                    message: 'What is the new roles salary?'
+                },
+                {
+                    type: 'input',
+                    name: 'newDepartmentIdentity',
+                    message: 'What is the new roles department id?'
                 }
-            ]).then((newRoleInfo) => {
-                newRoleInfo.insertNewRole(newRoleInfo);
-                mainMenuInterface()
+            ]).then(response => {
+                const addedRole = response.newRole;
+                const addedSalary = response.newSalary;
+                const addedDeptId = response.newDepartmentIdentity;
+
+                const sqlString = `
+                INSERT INTO roles (title, salary, department_id) VALUES ("${addedRole}", "${addedSalary}", "${addedDeptId}")`
+
+                db.query(sqlString, (err, result) => {
+                    if (err) throw err;
+
+                    console.log('\n')
+                    console.table(result)
+                    console.log('\n')
+
+                    mainMenuInterface();
+                })
             })
         }
-        if(response.choice == 'Add an employee') {
+        if (response.choice == 'Add an employee') {
             inquirer.prompt([
                 {
                     type: 'input',
                     name: 'firstName',
-                    message: 'What is the new roles name?'
+                    message: 'What is the new employees first name?'
                 },
                 {
                     type: 'input',
                     name: 'lastName',
-                    message: 'What is the new roles name?'
+                    message: 'What is the new employees last name?'
                 },
                 {
                     type: 'input',
-                    name: 'salary',
-                    message: 'What is the new roles name?'
+                    name: 'role_id',
+                    message: 'What is the new employees role?'
                 },
                 {
                     type: 'input',
-                    name: 'employeerole',
-                    message: 'What is the employees roles?'
+                    name: 'manager_id',
+                    message: 'What is the employees manager ID?'
                 }
-            ]).then((addedEmployee) => {
-                addedEmployee.insertNewEmployee(/* use template literals for multiple info into one func rather than have multiple funcs? */)
-                mainMenuInterface()
+            ]).then(response => {
+                const newFirst = response.firstName;
+                const newLast = response.lastName;
+                const givenRole = response.role_id;
+                const givenMngr = response.manager_id;
+
+                const sqlString = `
+                INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES ("${newFirst}", "${newLast}", "${givenRole}", "${givenMngr}")`;
+
+                db.query(sqlString, (err, result) => {
+                    if (err) throw err;
+
+                    console.log('\n')
+                    console.table(result)
+                    console.log('\n')
+
+                    mainMenuInterface();
+                })
             })
         }
-        if(response.choice == 'Update employee information') {
+        if (response.choice == 'Update employee information') {
             employeeUpdateInfo()
         }
         if (response.choice == 'Exit application') {
@@ -109,13 +144,50 @@ function mainMenuInterface () {
     })
 };
 
+
+let employeeUpdateInfo = function () {
+    employeeList = [];
+
+    db.query('SELECT * FROM employees',
+        function (err, employeeResults) {
+            if (err) throw err;
+            for (let i = 0; i < employeeResults.length; i++) {
+                if (employeeResults.first_name) {
+                    employeeList.push(employeeResults[i].first_name + ' ' + employeeResults.last_name);
+                } else return;
+            }
+        }).then(
+            inquirer.prompt([
+                {
+                    type: 'list',
+                    name: 'employeeList',
+                    message: 'Which employee are we updating the info on?',
+                    choices: employeeList
+                }
+            ]).then(response => {
+
+                const sqlString = `
+            select * from employees where first_name + last_name = "${response.employeeList}"`;
+
+                inquirer.prompt([
+                    {
+                        type: 'list',
+                        name: 'employeeList',
+                        message: 'What are we updating?',
+                        choices: ["first name", "last name", "role", "manager id"]
+                    }
+                ])
+            })
+        )
+};
+
 function viewDepartments() {
     const sqlString = `
     SELECT *
     FROM departments`
 
     db.query(sqlString, (err, result) => {
-        if(err) throw err;
+        if (err) throw err;
         console.log('\n')
         console.table(result)
         console.log('\n')
@@ -130,7 +202,7 @@ function viewEmployees() {
     FROM employees`
 
     db.query(sqlString, (err, result) => {
-        if(err) throw err;
+        if (err) throw err;
         console.log('\n')
         console.table(result)
         console.log('\n')
@@ -145,7 +217,7 @@ function viewRoles() {
     FROM roles`
 
     db.query(sqlString, (err, result) => {
-        if(err) throw err;
+        if (err) throw err;
         console.log('\n')
         console.table(result)
         console.log('\n')
@@ -153,48 +225,3 @@ function viewRoles() {
         mainMenuInterface()
     })
 };
-
-/* ).then(function ({ first_name, last_name, manager }) {
-            connection.query("INSERT INTO employee (first_name, last_name, manager) 
-                 VALUES ?", ('first_name', 'last_name', 'manager'), function (err, result) {
-                if (err) throw err;
-}) */
-
-
-/*
-
-make user of oop like in team profile generator
-
-make a function to view table of departments names and id's for "view all departments"
-
-make a function to see a table for "view all roles" which will hold:
--job title
--role id
--department that role belongs to
--salary of role
-
-make a function to view all employees table which will hold:
--employee id
--first name
--last name
--job title
--departent
--salary
--managers of employee
-
-make a function for adding a department name to the database
-
-make a funciton for adding a role which will include:
--name
--salary
--department it belongs to
-
-make a function for adding an employee to the database which will include:
--first name
--last name
--role
--manager
-
-make a function for updating a employee which will grab it based on id:
--update their role via multiple choice?
- */
