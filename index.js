@@ -146,6 +146,9 @@ function mainMenuInterface() {
 
 
 let employeeUpdateInfo = function () {
+
+    // JUST SEARCH BY ID FOR THIS TO BE EASIER AND NOT NEED THE FOR LOOP
+
     employeeList = [];
 
     db.query('SELECT * FROM employees',
@@ -153,7 +156,7 @@ let employeeUpdateInfo = function () {
             if (err) throw err;
             for (let i = 0; i < employeeResults.length; i++) {
                 if (employeeResults.first_name) {
-                    employeeList.push(employeeResults[i].first_name + ' ' + employeeResults.last_name);
+                    employeeList.push(employeeResults[i]);
                 } else return;
             }
         }).then(
@@ -177,6 +180,7 @@ let employeeUpdateInfo = function () {
                         choices: ["first name", "last name", "role", "manager id"]
                     }
                 ])
+                
             })
         )
 };
