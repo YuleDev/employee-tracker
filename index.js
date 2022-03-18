@@ -144,45 +144,63 @@ function mainMenuInterface() {
     })
 };
 
+let getEmployees = function() {
+    return db.promise().query('SELECT * FROM employees')
+}
 
-let employeeUpdateInfo = function () {
+let employeeUpdateInfo = async function () {
 
+    const [rows] = await getEmployees();
+    console.log(rows)
+    const employeeList = rows.map(element => ({
+        name: element.first_name + " " + element.last_name,
+        value: element.id
+    }))
+    console.log(employeeList)
     // JUST SEARCH BY ID FOR THIS TO BE EASIER AND NOT NEED THE FOR LOOP
+    inquirer.prompt(
+        {
+            message: 'Which Employee would you like to update?',
+            name: 'employeeId',
+            type: 'list',
+            choices: employeeList
+        }
+    ).then(answers => {
+        console.log(answers)
+    })
+    // employeeList = [];
 
-    employeeList = [];
+    // db.query('SELECT * FROM employees',
+    //     function (err, employeeResults) {
+    //         if (err) throw err;
+    //         for (let i = 0; i < employeeResults.length; i++) {
+    //             if (employeeResults.first_name) {
+    //                 employeeList.push(employeeResults[i]);
+    //             } else return;
+    //         }
+    //     }).then(
+    //         inquirer.prompt([
+    //             {
+    //                 type: 'list',
+    //                 name: 'employeeList',
+    //                 message: 'Which employee are we updating the info on?',
+    //                 choices: employeeList
+    //             }
+    //         ]).then(response => {
 
-    db.query('SELECT * FROM employees',
-        function (err, employeeResults) {
-            if (err) throw err;
-            for (let i = 0; i < employeeResults.length; i++) {
-                if (employeeResults.first_name) {
-                    employeeList.push(employeeResults[i]);
-                } else return;
-            }
-        }).then(
-            inquirer.prompt([
-                {
-                    type: 'list',
-                    name: 'employeeList',
-                    message: 'Which employee are we updating the info on?',
-                    choices: employeeList
-                }
-            ]).then(response => {
+    //             const sqlString = `
+    //         select * from employees where first_name + last_name = "${response.employeeList}"`;
 
-                const sqlString = `
-            select * from employees where first_name + last_name = "${response.employeeList}"`;
-
-                inquirer.prompt([
-                    {
-                        type: 'list',
-                        name: 'employeeList',
-                        message: 'What are we updating?',
-                        choices: ["first name", "last name", "role", "manager id"]
-                    }
-                ])
-                
-            })
-        )
+    //             inquirer.prompt([
+    //                 {
+    //                     type: 'list',
+    //                     name: 'employeeList',
+    //                     message: 'What are we updating?',
+    //                     choices: ["first name", "last name", "role", "manager id"]
+    //                 }
+    //             ])
+    //         })
+    //     )
 };
 
 function viewDepartments() {
